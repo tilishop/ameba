@@ -1,28 +1,45 @@
 require "../../spec_helper"
+require "file_utils"
 
 module Ameba
   private def create_todo
-    file = IO::Memory.new
-    formatter = Formatter::TODOFormatter.new IO::Memory.new, file
-
+    formatter = Formatter::TODOFormatter.new IO::Memory.new
     s = Source.new "a = 1", "source.cr"
     s.add_issue DummyRule.new, {1, 2}, "message"
-
-    formatter.finished [s]
-    file.to_s
+    file = formatter.finished([s])
+    file ? File.read(file.path) : ""
   end
 
   describe Formatter::TODOFormatter do
+    Spec.after_each do
+      FileUtils.rm(Ameba::Config::PATH) if File.exists?(Ameba::Config::PATH)
+    end
+
     context "problems not found" do
-      it "does not create todo" do
-        file = IO::Memory.new
-        formatter = Formatter::TODOFormatter.new IO::Memory.new, file
+      it "does not create file" do
+        formatter = Formatter::TODOFormatter.new IO::Memory.new
+        file = formatter.finished [Source.new ""]
+        file.should be_nil
+      end
+
+      it "reports a message saying file is not created" do
+        io = IO::Memory.new
+        formatter = Formatter::TODOFormatter.new io
         formatter.finished [Source.new ""]
-        file.to_s.empty?.should be_true
+        io.to_s.should contain "No issues found. File is not generated"
       end
     end
 
     context "problems found" do
+      it "prints a message saying file is created" do
+        io = IO::Memory.new
+        formatter = Formatter::TODOFormatter.new io
+        s = Source.new "a = 1", "source.cr"
+        s.add_issue DummyRule.new, {1, 2}, "message"
+        formatter.finished([s])
+        io.to_s.should contain "Created .ameba.yml"
+      end
+
       it "creates a valid YAML document" do
         YAML.parse(create_todo).should_not be_nil
       end
@@ -59,18 +76,50 @@ module Ameba
         create_todo.should contain "Excluded:\n  - source.cr"
       end
 
-      context "when invalid syntax" do
-        it "does not exclude Syntax rule" do
-          file = IO::Memory.new
-          formatter = Formatter::TODOFormatter.new IO::Memory.new, file
+      context "with multiple issues" do
+        formatter = Formatter::TODOFormatter.new IO::Memory.new
 
+        s1 = Source.new "a = 1", "source1.cr"
+        s2 = Source.new "a = 1", "source2.cr"
+        s1.add_issue DummyRule.new, {1, 2}, "message1"
+        s1.add_issue NamedRule.new, {1, 2}, "message1"
+        s1.add_issue DummyRule.new, {2, 2}, "message1"
+        s2.add_issue DummyRule.new, {2, 2}, "message2"
+
+        file = formatter.finished([s1, s2])
+        content = File.read(file.not_nil!.path)
+        content.should contain <<-CONTENT
+        # Problems found: 3
+        # Run `ameba --only Ameba/DummyRule` for details
+        Ameba/DummyRule:
+          Description: Dummy rule that does nothing.
+          Enabled: true
+          Severity: Convention
+          Excluded:
+          - source1.cr
+          - source2.cr
+        CONTENT
+      end
+
+      context "when invalid syntax" do
+        it "does generate todo file" do
+          formatter = Formatter::TODOFormatter.new IO::Memory.new
+          s = Source.new "def invalid_syntax"
+          s.add_issue Rule::Lint::Syntax.new, {1, 2}, "message"
+
+          file = formatter.finished [s]
+          file.should be_nil
+        end
+
+        it "prints an error message" do
+          io = IO::Memory.new
+          formatter = Formatter::TODOFormatter.new io
           s = Source.new "def invalid_syntax"
           s.add_issue Rule::Lint::Syntax.new, {1, 2}, "message"
 
           formatter.finished [s]
-          content = file.to_s
-
-          content.should_not contain "Syntax"
+          io.to_s.should contain "Unable to generate TODO file"
+          io.to_s.should contain "Please fix syntax issues"
         end
       end
     end

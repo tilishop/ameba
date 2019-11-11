@@ -2,7 +2,6 @@ require "./ameba/*"
 require "./ameba/ast/**"
 require "./ameba/rule/**"
 require "./ameba/formatter/*"
-require "./ameba/support/*"
 
 # Ameba's entry module.
 #
@@ -25,7 +24,7 @@ require "./ameba/support/*"
 module Ameba
   extend self
 
-  VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
+  VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify }}
 
   # Initializes `Ameba::Runner` and runs it.
   # Can be configured via `config` parameter.

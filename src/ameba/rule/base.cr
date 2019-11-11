@@ -105,6 +105,14 @@ module Ameba::Rule
       SPECIAL.includes? name
     end
 
+    def ==(other)
+      name == other.try &.name
+    end
+
+    def hash
+      name.hash
+    end
+
     macro issue_for(*args)
       source.add_issue self, {{*args}}
     end

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://gitcdn.link/repo/veelenga/bin/master/ameba/logo.png" width="200">
+  <img src="https://raw.githubusercontent.com/veelenga/bin/master/ameba/logo.png" width="800">
   <h3 align="center">Ameba</h3>
   <p align="center">Code style linter for Crystal<p>
   <p align="center">
@@ -8,12 +8,28 @@
     </sup>
   </p>
   <p align="center">
-    <a href="https://travis-ci.org/veelenga/ameba"><img src="https://travis-ci.org/veelenga/ameba.svg?branch=master"></a>
-    <a href="https://github.com/veelenga/ameba/releases"><img src="https://img.shields.io/github/release/veelenga/ameba.svg?maxAge=360"></a>
-    <a href="https://github.com/veelenga/ameba/blob/master/LICENSE"><img src="https://img.shields.io/github/license/veelenga/ameba.svg"></a>
+    <a href="https://travis-ci.org/crystal-ameba/ameba"><img src="https://travis-ci.org/crystal-ameba/ameba.svg?branch=master"></a>
+    <a href="https://github.com/crystal-ameba/ameba/releases"><img src="https://img.shields.io/github/release/crystal-ameba/ameba.svg?maxAge=360"></a>
+    <a href="https://github.com/crystal-ameba/ameba/blob/master/LICENSE"><img src="https://img.shields.io/github/license/crystal-ameba/ameba.svg"></a>
   <a href="https://gitter.im/veelenga/ameba?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/veelenga/ameba.svg"></a>
   </p>
 </p>
+
+- [About](#about)
+- [Usage](#usage)
+  * [Run in parallel](#run-in-parallel)
+- [Installation](#installation)
+  * [As a project dependency:](#as-a-project-dependency)
+  * [OS X](#os-x)
+  * [Docker](#docker)
+  * [From sources](#from-sources)
+- [Configuration](#configuration)
+  * [Only/Except](#onlyexcept)
+  * [Explanation](#explanation)
+  * [Inline disabling](#inline-disabling)
+- [Editor integration](#editor-integration)
+- [Credits & inspirations](#credits--inspirations)
+- [Contributors](#contributors)
 
 ## About
 
@@ -21,7 +37,7 @@ Ameba is a static code analysis tool for the Crystal language.
 It enforces a consistent [Crystal code style](https://crystal-lang.org/docs/conventions/coding_style.html),
 also catches code smells and wrong code constructions.
 
-See also [Roadmap](https://github.com/veelenga/ameba/wiki).
+See also [Roadmap](https://github.com/crystal-ameba/ameba/wiki).
 
 ## Usage
 
@@ -49,6 +65,26 @@ Finished in 542.64 milliseconds
 
 ```
 
+### Run in parallel
+
+Starting from 0.31.0 Crystal [supports parallelism](https://crystal-lang.org/2019/09/06/parallelism-in-crystal.html).
+It allows to run linting in parallel too.
+In order to take advantage of this feature you need to build ameba with preview_mt support:
+
+```
+$ crystal build src/cli.cr -Dpreview_mt -o bin/ameba
+$ make install
+```
+
+Some quick benchmark results measured while running Ameba on Crystal repo:
+
+```
+$ CRYSTAL_WORKERS=1 ameba #=> 29.11 seconds
+$ CRYSTAL_WORKERS=2 ameba #=> 19.49 seconds
+$ CRYSTAL_WORKERS=4 ameba #=> 13.48 seconds
+$ CRYSTAL_WORKERS=8 ameba #=> 10.14 seconds
+```
+
 ## Installation
 
 ### As a project dependency:
@@ -58,8 +94,8 @@ Add this to your application's `shard.yml`:
 ```yaml
 development_dependencies:
   ameba:
-    github: veelenga/ameba
-    version: ~> 0.10.0
+    github: crystal-ameba/ameba
+    version: ~> 0.10.1
 ```
 
 Build `bin/ameba` binary within your project directory while running `shards install`.
@@ -73,7 +109,7 @@ install:
   - shards install
 script:
   - crystal spec
-  - bin/ameba
+  - crystal bin/ameba.cr
 ```
 
 Using this config Ameba will inspect files just after the specs run. Travis will also fail
@@ -103,7 +139,7 @@ $ docker run -v $(pwd):/src ameba/ameba
 ### From sources
 
 ```sh
-$ git clone https://github.com/veelenga/ameba && cd ameba
+$ git clone https://github.com/crystal-ameba/ameba && cd ameba
 $ make install
 ```
 
@@ -155,9 +191,9 @@ time = Time.epoch(1483859302) # ameba:disable Style, Lint
 ## Editor integration
 
  * Vim: [vim-crystal](https://github.com/rhysd/vim-crystal), [Ale](https://github.com/w0rp/ale)
- * Emacs: [ameba.el](https://github.com/veelenga/ameba.el)
+ * Emacs: [ameba.el](https://github.com/crystal-ameba/ameba.el)
  * Sublime Text: [Sublime Linter Ameba](https://github.com/epergo/SublimeLinter-contrib-ameba)
- * VSCode: [vscode-crystal-ameba](https://github.com/veelenga/vscode-crystal-ameba)
+ * VSCode: [vscode-crystal-ameba](https://github.com/crystal-ameba/vscode-crystal-ameba)
 
 ## Credits & inspirations
 

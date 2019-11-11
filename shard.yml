@@ -1,5 +1,5 @@
 name: ameba
-version: 0.10.0
+version: 0.10.1
 
 crystal: 0.29.0
 license: MIT
@@ -11,7 +11,8 @@ targets:
     main: src/cli.cr
 
 scripts:
-  postinstall: make bin
+  # TODO: remove pre-compiled executable in future releases
+  postinstall: make bin && make run_file
 
 executables:
   - ameba
