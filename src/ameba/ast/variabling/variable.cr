@@ -73,6 +73,7 @@ module Ameba::AST
     def reference(node : Crystal::Var, scope : Scope)
       Reference.new(node, scope).tap do |reference|
         references << reference
+        scope.references << reference
       end
     end
 

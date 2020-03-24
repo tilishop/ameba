@@ -66,6 +66,15 @@ module Ameba::AST
         variable.reference(var_node, scope)
         variable.references.any?.should be_true
       end
+
+      it "adds a reference to the scope" do
+        scope = Scope.new as_node "foo = 1"
+        variable = Variable.new(var_node, scope)
+        variable.assign(as_node "foo=1")
+        variable.reference(var_node, scope)
+        scope.references.size.should eq 1
+        scope.references.first.node.to_s.should eq "foo"
+      end
     end
 
     describe "#captured_by_block?" do

@@ -7,6 +7,9 @@ module Ameba::AST
     # Link to local variables
     getter variables = [] of Variable
 
+    # Link to all variable references in currency scope
+    getter references = [] of Reference
+
     # Link to the arguments in current scope
     getter arguments = [] of Argument
 
@@ -92,6 +95,19 @@ module Ameba::AST
     # false if not.
     def block?
       node.is_a?(Crystal::Block) || node.is_a?(Crystal::ProcLiteral)
+    end
+
+    # Returns true if current scope represents a spawn block, e. g.
+    #
+    # ```
+    # spawn do
+    #   # ...
+    # end
+    # ```
+    def spawn_block?
+      return false unless node.is_a?(Crystal::Block)
+      call = node.as(Crystal::Block).call
+      !call.nil? && call.name == "spawn"
     end
 
     # Returns true if currency scope represents a macro.
